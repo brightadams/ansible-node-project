@@ -11,8 +11,20 @@
         pkg:
           - nodejs
           - npm
+#create a non-root user
+- name: Create new linux user for node app
+  hosts: 206.189.20.204
+  tasks:
+    - name: Create linux user
+      user:
+        name: bright
+        comment: Bright Admin
+        group: admin
+
 - name: Deploy nodejs app
   hosts: 206.189.20.204
+  become: True
+  become_user: bright
   tasks:
     # since we can untar from local to remote we do not need to copy
     # #so here we want to copy the tar file to server
@@ -24,6 +36,24 @@
     - name: Unpack the node tar
       unarchive:
         src: /Users/brightadams/Desktop/projects/devops/devops_bootcamp_nana/simple-nodejs/nodejs-app-1.0.0.tgz
-        dest: /root/
+        dest: /home/bright
         # so we do the below to tell ansible that the file is on remote server, we donot do that ansible will look at our local files
         #remote_src: yes
+    - name: Install dependencies
+      #use npm to install dependencies, just the path to where the package.json file is
+      npm:
+        path: /home/bright/package
+    - name: Start the application
+      # so we want to do; node server.js ; and since there no module to do that , we use command module which already passes commands on the server
+      command:
+        chdir: /home/bright/package/app
+        cmd: node server
+      # the command above will block terminal and no command can be run again, so we do the below to be able to put it in the background
+      async: 1000
+      poll: 0
+    - name: Ensure app is running
+      shell: ps aux | grep node
+      #we do not see the output of the above cmd so we store it in a variable
+      register: app_status
+      #then we display the variable using the debug module
+    - debug: msg={{app_status.stdout}}
