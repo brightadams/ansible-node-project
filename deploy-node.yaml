@@ -1,0 +1,28 @@
+---
+- name: Install node and npm
+  hosts: 206.189.20.204
+  tasks:
+    #we update the apt package first
+    - name: Update apt package
+      apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+    - name: Install nodejs and npm
+      #so since we have more than one package to install we do it this way
+      apt:
+        pkg:
+          - nodejs
+          - npm
+- name: Deploy nodejs app
+  hosts: 206.189.20.204
+  tasks:
+    #so here we want to copy the tar file to server
+    - name: Copy nodejs folder to server
+      copy:
+        src: /Users/brightadams/Desktop/projects/devops/devops_bootcamp_nana/simple-nodejs/nodejs-app-1.0.0.tgz
+        dest: /root/app-1.0.0.tgz
+        #we unpack the zip file
+    - name: Unpack the node tar
+      unarchive:
+        src: /root/app-1.0.0.tgz
+        dest: /root/
+        # so we do the below to tell ansible that the file is on remote server, we donot do that ansible will look at our local files
+        remote_src: yes
