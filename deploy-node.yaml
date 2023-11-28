@@ -11,20 +11,31 @@
         pkg:
           - nodejs
           - npm
+
 #create a non-root user
 - name: Create new linux user for node app
   hosts: 206.189.20.204
+  vars_files:
+    - project-vars
   tasks:
     - name: Create linux user
       user:
-        name: bright
+        name: "{{linux_name}}"
         comment: Bright Admin
         group: admin
+      register: user_creation
+    - debug: msg={{user_creation}}
 
 - name: Deploy nodejs app
   hosts: 206.189.20.204
   become: True
-  become_user: bright
+  become_user: "{{linux_name}}"
+  vars:
+    # - location: /Users/brightadams/Desktop/projects/devops/devops_bootcamp_nana/simple-nodejs
+    # - version: 1.0.0
+    - destination: "/home/{{linux_name}}"
+  vars_files:
+    - project-vars
   tasks:
     # since we can untar from local to remote we do not need to copy
     # #so here we want to copy the tar file to server
@@ -35,14 +46,14 @@
     #we unpack the zip file
     - name: Unpack the node tar
       unarchive:
-        src: /Users/brightadams/Desktop/projects/devops/devops_bootcamp_nana/simple-nodejs/nodejs-app-1.0.0.tgz
-        dest: /home/bright
+        src: "{{location}}/nodejs-app-{{version}}.tgz"
+        dest: "{{destination}}"
         # so we do the below to tell ansible that the file is on remote server, we donot do that ansible will look at our local files
         #remote_src: yes
     - name: Install dependencies
       #use npm to install dependencies, just the path to where the package.json file is
       npm:
-        path: /home/bright/package
+        path: "{{destination}}/package"
     - name: Start the application
       # so we want to do; node server.js ; and since there no module to do that , we use command module which already passes commands on the server
       command:
