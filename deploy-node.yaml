@@ -14,15 +14,16 @@
 - name: Deploy nodejs app
   hosts: 206.189.20.204
   tasks:
-    #so here we want to copy the tar file to server
-    - name: Copy nodejs folder to server
-      copy:
-        src: /Users/brightadams/Desktop/projects/devops/devops_bootcamp_nana/simple-nodejs/nodejs-app-1.0.0.tgz
-        dest: /root/app-1.0.0.tgz
-        #we unpack the zip file
+    # since we can untar from local to remote we do not need to copy
+    # #so here we want to copy the tar file to server
+    # - name: Copy nodejs folder to server
+    #   copy:
+    #     src: /Users/brightadams/Desktop/projects/devops/devops_bootcamp_nana/simple-nodejs/nodejs-app-1.0.0.tgz
+    #     dest: /root/app-1.0.0.tgz
+    #we unpack the zip file
     - name: Unpack the node tar
       unarchive:
-        src: /root/app-1.0.0.tgz
+        src: /Users/brightadams/Desktop/projects/devops/devops_bootcamp_nana/simple-nodejs/nodejs-app-1.0.0.tgz
         dest: /root/
         # so we do the below to tell ansible that the file is on remote server, we donot do that ansible will look at our local files
-        remote_src: yes
+        #remote_src: yes
